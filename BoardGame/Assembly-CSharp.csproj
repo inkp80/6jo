@@ -51,8 +51,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\BoardManager.cs" />
-     <Compile Include="Assets\Piece.cs" />
+     <Compile Include="Assets\ItemUI.cs" />
+     <Compile Include="Assets\Script\BoardManager.cs" />
+     <Compile Include="Assets\Script\Piece.cs" />
  <Reference Include="UnityEngine.Analytics">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnityAnalytics/UnityEngine.Analytics.dll</HintPath>
  </Reference>

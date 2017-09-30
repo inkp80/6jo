@@ -43,10 +43,9 @@ public class Piece : MonoBehaviour {
 
 
 	public void flipPiece(){
-		while (rigidbody.position.y < 2) {
-			rigidbody.AddForce (Vector3.up * 50 * (2 - rigidbody.position.y));
-		}
-		rigidbody.AddTorque (0, 0, 8);
+//		rigidbody.MoveRotation (Quaternion.AngleAxis (180, Vector3.left));
+		rigidbody.AddForce (Vector3.up * 345);
+		rigidbody.AddTorque (0, 0, 5);
 	}
 
 
@@ -65,5 +64,25 @@ public class Piece : MonoBehaviour {
 //		rigidbody.AddTorque (0, 0, 8);
 //		rigidbody.useGravity = true;
 //	}
+
+
+//	private bool isTriggered = false;
+//	private void OnTriggerEnter(Collider other){
+//		if (isTriggered == false) {
+//			if (other.gameObject.CompareTag ("GameBoard")) {
+//
+//				Vector3 origin = Vector3.zero;
+//				origin.x += (1.0f * positionX) + 0.5f;
+//				origin.z += (1.0f * positionY) + 0.5f;
+//				origin.y += 10.0f;
+//				rigidbody.MovePosition (origin);
+//
+//				Debug.Log ("trigger enter : " + positionX + ", " + positionY);
+//				rigidbody.MovePosition (origin);
+//			}
+//			isTriggered = true;
+//		}
+//	}
+		
 		
 }

@@ -14,6 +14,10 @@ public class BoardManager : MonoBehaviour {
 	private int selectionX = -1;
 	private int selectionY = -1;
 
+	private bool itemActiveState = false;
+	private int itemCode = -1;
+
+
 	public GameObject reversiPrefab;
 	public Piece[,] activedPieces{ set; get; }
 
@@ -26,7 +30,7 @@ public class BoardManager : MonoBehaviour {
 		UpdateSelection ();
 		DrawBoard ();
 
-		if (Input.GetMouseButton (0)) {
+		if (Input.GetMouseButtonUp (0)) {
 			
 			startAction(selectionX, selectionY, currentPlayer);
 		
@@ -80,19 +84,19 @@ public class BoardManager : MonoBehaviour {
 
 	private void DrawBoard(){
 		//single tile's size 1m * 8 * 8
-		//Vector3 widthLine = Vector3.right * 8;
-		//Vector3 heightLine = Vector3.forward * 8;
+		Vector3 widthLine = Vector3.right * 8;
+		Vector3 heightLine = Vector3.forward * 8;
 
 
-		//drawing checker box
-//		for (int i = 0; i <= 8; i++) {
-//			Vector3 start = Vector3.forward * i;
-//			Debug.DrawLine (start, start + widthLine);
-//			for (int j = 0; j <= 8; j++) {
-//				start = Vector3.right * i;
-//				Debug.DrawLine (start, start + heightLine);
-//			}
-//		}
+//		drawing checker box
+		for (int i = 0; i <= 8; i++) {
+			Vector3 start = Vector3.forward * i;
+			Debug.DrawLine (start, start + widthLine);
+			for (int j = 0; j <= 8; j++) {
+				start = Vector3.right * i;
+				Debug.DrawLine (start, start + heightLine);
+			}
+		}
 
 		//Draw the selection
 		if (selectionX >= 0 && selectionY >= 0) {
@@ -116,8 +120,7 @@ public class BoardManager : MonoBehaviour {
 
 		return origin;
 	}
-
-	//TODO : method name
+		
 	private void startAction(int x, int y, int player){
 
 		if (checkArrangeVaildation (x, y) == false) {
@@ -136,15 +139,85 @@ public class BoardManager : MonoBehaviour {
 
 		
 			spawnPiece (x, y, currentPlayer);
+
+			if (itemActiveState == true) {
+				itemActiveState = false;
+				Debug.Log ("Item code : " + itemCode); 
+				switch (itemCode) {
+				case 1: 
+					Debug.Log ("filp activate");
+					useFilpItem (x, y);
+					break;
+				case 2:
+					useLineItem (x, y);
+					break;
+				default:
+					break;
+				}
+			}
+
 			currentPlayer = ~currentPlayer;
 		}
 	}
 
 	public bool checkArrangeVaildation(int x, int y){
-		if (selectionX >= 0 && selectionY >= 0) {
+		if ((0 <= x && x < 8 ) && (0 <= y && y < 8)) {
 			return true;
 		} else {
 			return false;
 		}
 	}
+
+
+	public void activateItem(int itemCode){
+		Debug.Log ("Item Seleceted");
+		this.itemCode = itemCode;
+		itemActiveState = true;
+	}
+
+	private void useFilpItem(int x, int y){
+		for (int i = 0; i < 8; i++) {
+			int nextX = dx [i] + x;
+			int nextY = dy [i] + y;
+
+			if (checkArrangeVaildation (nextX, nextY)) {
+				if (activedPieces [nextX, nextY] != null) {
+					activedPieces [nextX, nextY].flipPiece ();
+					activedPieces [nextX, nextY].setColor (currentPlayer);
+				}
+			}
+		}
+	}
+
+	int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
+	int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
+
+
+	private void useLineItem(int x, int y){
+		for (int i = 0; i < 8; i++) {
+			if (i == x) {
+				continue;
+			} else {
+				if (activedPieces [i, y] != null
+					&& currentPlayer != activedPieces [i, y].getColor ()) {
+					activedPieces [i, y].flipPiece ();
+					activedPieces [i, y].setColor (currentPlayer);
+				}
+			}
+		}
+		for (int i = 0; i < 8; i++) {
+			if (i == y) {
+				continue;
+			} else {
+				if (activedPieces [x, i] != null
+					&& currentPlayer != activedPieces [x, i].getColor ()) {
+					activedPieces [x, i].flipPiece ();
+					activedPieces [x, i].setColor (currentPlayer);
+				}
+			}
+		}
+
+
+	}
+
 }
