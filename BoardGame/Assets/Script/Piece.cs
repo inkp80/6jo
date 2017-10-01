@@ -66,23 +66,15 @@ public class Piece : MonoBehaviour {
 //	}
 
 
-//	private bool isTriggered = false;
-//	private void OnTriggerEnter(Collider other){
-//		if (isTriggered == false) {
-//			if (other.gameObject.CompareTag ("GameBoard")) {
-//
-//				Vector3 origin = Vector3.zero;
-//				origin.x += (1.0f * positionX) + 0.5f;
-//				origin.z += (1.0f * positionY) + 0.5f;
-//				origin.y += 10.0f;
-//				rigidbody.MovePosition (origin);
-//
-//				Debug.Log ("trigger enter : " + positionX + ", " + positionY);
-//				rigidbody.MovePosition (origin);
-//			}
-//			isTriggered = true;
-//		}
-//	}
+	private bool isTriggered = false;
+	private void OnTriggerEnter(Collider other){
+		if (isTriggered == false) {
+			if (other.gameObject.CompareTag ("GameBoard")) {
+				Debug.Log ("trigger enter : " + positionX + ", " + positionY);
+			}
+			isTriggered = true;
+		}
+	}
 		
 		
 }

@@ -100,8 +100,12 @@
 -define:ENABLE_NATIVE_ARRAY_CHECKS
 -define:UNITY_TEAM_LICENSE
 'Assets/ItemUI.cs'
+'Assets/Script/BlackScore.cs'
 'Assets/Script/BoardManager.cs'
 'Assets/Script/Piece.cs'
+'Assets/Script/RestartGame.cs'
+'Assets/Script/UIController.cs'
+'Assets/Script/WhiteScore.cs'
 -r:'/Applications/Unity/Unity.app/Contents/Mono/lib/mono/unity/System.Runtime.Serialization.dll'
 -r:'/Applications/Unity/Unity.app/Contents/Mono/lib/mono/unity/System.Xml.Linq.dll'
 -r:'/Applications/Unity/Unity.app/Contents/Mono/lib/mono/unity/UnityScript.dll'

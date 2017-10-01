@@ -52,8 +52,12 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\ItemUI.cs" />
+     <Compile Include="Assets\Script\BlackScore.cs" />
      <Compile Include="Assets\Script\BoardManager.cs" />
      <Compile Include="Assets\Script\Piece.cs" />
+     <Compile Include="Assets\Script\RestartGame.cs" />
+     <Compile Include="Assets\Script\UIController.cs" />
+     <Compile Include="Assets\Script\WhiteScore.cs" />
  <Reference Include="UnityEngine.Analytics">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnityAnalytics/UnityEngine.Analytics.dll</HintPath>
  </Reference>
