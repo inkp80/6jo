@@ -66,9 +66,9 @@ public class Piece : MonoBehaviour {
 //	}
 
 
-	private void OnTriggerExit(Collider other){
-		if (other.gameObject.CompareTag ("GameBoard")) {
-			BoardManager.controllStatus = true;
-		}
-	}
+//	private void OnTriggerExit(Collider other){
+//		if (other.gameObject.CompareTag ("GameBoard")) {
+//			BoardManager.controllStatus = true;
+//		}
+//	}
 }

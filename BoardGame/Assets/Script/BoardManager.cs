@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour {
-	public static bool controllStatus = true;
+//	public static bool controllStatus = true;
 
 
 	private int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
@@ -66,6 +66,7 @@ public class BoardManager : MonoBehaviour {
 	private float fireRate = 1.8f;
 
 	private void Update(){
+		checkPause ();
 		UpdateSelection ();
 		DrawBoard ();
 			
@@ -82,10 +83,10 @@ public class BoardManager : MonoBehaviour {
 			
 		if (Input.GetMouseButtonUp (0) && Time.time > nextFire) {
 			nextFire = Time.time + fireRate;
-			if (controllStatus == false) {
-				Debug.Log ("cannot accept input");
-				return;
-			}
+//			if (controllStatus == false) {
+//				Debug.Log ("cannot accept input");
+//				return;
+//			}
 			
 			startAction(selectionX, selectionY, currentPlayer);
 		}
@@ -340,7 +341,7 @@ public class BoardManager : MonoBehaviour {
 			checkSpawnAbility ();
 
 			if (flipList.Count > 0) {
-				controllStatus = false;
+				//controllStatus = false;
 
 				while (removalList.Count > 0) {
 					Destroy (removalList[0]);
@@ -480,6 +481,24 @@ public class BoardManager : MonoBehaviour {
 		}
 
 
+	}
+
+	private bool pauseFlag = false;
+	public void onPauseButtonClick(){
+		nextFire = Time.time + 1.0f;
+		if (pauseFlag) {
+			pauseFlag = false;
+		} else {
+			pauseFlag = true;
+		}
+	}
+
+	private void checkPause(){
+		if (pauseFlag) {
+			Time.timeScale = 0;
+		} else {
+			Time.timeScale = 1;
+		}
 	}
 
 }
