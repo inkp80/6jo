@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour {
-	public static bool controllStatus = false;
+	public static bool controllStatus = true;
 
 
 	private int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
@@ -77,8 +77,8 @@ public class BoardManager : MonoBehaviour {
 		}
 			
 		if (Input.GetMouseButtonUp (0)) {
-			if (controllStatus) {
-				Debug.Log ("dont");
+			if (controllStatus == false) {
+				Debug.Log ("cannot accept input");
 				return;
 			}
 			
@@ -335,7 +335,7 @@ public class BoardManager : MonoBehaviour {
 			checkSpawnAbility ();
 
 			if (flipList.Count > 0) {
-				controllStatus = true;
+				controllStatus = false;
 
 				while (removalList.Count > 0) {
 					Destroy (removalList[0]);

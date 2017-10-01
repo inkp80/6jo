@@ -66,14 +66,9 @@ public class Piece : MonoBehaviour {
 //	}
 
 
-	private bool isTriggered = false;
-	private void OnTriggerEnter(Collider other){
-		if (isTriggered == false) {
-			if (other.gameObject.CompareTag ("GameBoard")) {
-				Debug.Log ("trigger enter : " + positionX + ", " + positionY);
-				BoardManager.controllStatus = false;
-			}
-			isTriggered = true;
+	private void OnTriggerExit(Collider other){
+		if (other.gameObject.CompareTag ("GameBoard")) {
+			BoardManager.controllStatus = true;
 		}
 	}
 }
