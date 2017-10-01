@@ -218,7 +218,7 @@ public class BoardManager : MonoBehaviour {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				if (activedPieces [i, j] != null) {
-					if (activedPieces [i, j].getOwner() == 0) {
+					if (activedPieces [i, j].getOwner() == WHITE_PLAYER) {
 						white++;
 					} else {
 						black++;
@@ -435,6 +435,7 @@ public class BoardManager : MonoBehaviour {
 
 
 	public void activateItem(int itemCode){
+		nextFire = Time.time;
 		Debug.Log ("Item Seleceted");
 		this.itemCode = itemCode;
 		itemActiveState = true;
@@ -448,7 +449,7 @@ public class BoardManager : MonoBehaviour {
 			if (checkArrangeVaildation (nextX, nextY)) {
 				if (activedPieces [nextX, nextY] != null) {
 					activedPieces [nextX, nextY].flipPiece ();
-					activedPieces [nextX, nextY].setOwner (currentPlayer);
+					activedPieces [nextX, nextY].setOwner (~activedPieces[nextX, nextY].getOwner());
 				}
 			}
 		}
