@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour {
+	public static bool controllStatus = false;
 
 
 	private int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
@@ -47,6 +48,10 @@ public class BoardManager : MonoBehaviour {
 
 
 		if (Input.GetMouseButtonUp (0)) {
+			if (controllStatus) {
+				Debug.Log ("dont");
+				return;
+			}
 			
 			startAction(selectionX, selectionY, currentPlayer);
 		
@@ -162,6 +167,7 @@ public class BoardManager : MonoBehaviour {
 			checkSpawnAbility ();
 
 			if (flipList.Count > 0) {
+				controllStatus = true;
 				spawnPiece (x, y, currentPlayer);
 
 				if (itemActiveState == true) {

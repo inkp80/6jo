@@ -71,10 +71,9 @@ public class Piece : MonoBehaviour {
 		if (isTriggered == false) {
 			if (other.gameObject.CompareTag ("GameBoard")) {
 				Debug.Log ("trigger enter : " + positionX + ", " + positionY);
+				BoardManager.controllStatus = false;
 			}
 			isTriggered = true;
 		}
 	}
-		
-		
 }
