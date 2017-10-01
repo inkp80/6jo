@@ -1341,6 +1341,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64c63fce605774730b00697d8e13fa84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  removalPrefab: {fileID: 1863558917433054, guid: a9be61c1fa2660d4ea80eb6e175f5aea,
+    type: 2}
   reversiPrefab: {fileID: 1763358913292048, guid: 65f2e665a055a4d9fad9423401dc22b7,
     type: 2}
   resultText: {fileID: 1520774607}
