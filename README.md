@@ -9,5 +9,5 @@
 
 ### Current Implement state
 - Base object models are adapted
-- Base placing item function (Game logic is not implemented yet)
 - Item 'Filp' and 'Line' are implemented
+- Game logic implemented
