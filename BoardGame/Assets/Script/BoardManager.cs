@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class BoardManager : MonoBehaviour {
 
+
+	private int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
+	private int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
+
+
 	private const int WHITE_PLAYER = 0;
 	private const int BLACK_PLAYER = -1;
 	private const float TILE_SIZE = 1.0f;
@@ -45,7 +50,6 @@ public class BoardManager : MonoBehaviour {
 		if (!Camera.main) {
 			return;
 		}
-
 		RaycastHit hit;
 		if (Physics.Raycast (
 			   Camera.main.ScreenPointToRay (Input.mousePosition), 
@@ -63,20 +67,6 @@ public class BoardManager : MonoBehaviour {
 	}
 
 
-	private void spawnPiece(int x, int y, int player){
-
-		Vector3 spawnPosition = getTileCenter (x, y);
-		Quaternion rotationState = 
-			(player == WHITE_PLAYER) ? Quaternion.identity : Quaternion.AngleAxis (180, Vector3.left);
-
-		GameObject go = Instantiate (reversiPrefab, spawnPosition, rotationState) as GameObject;
-		go.transform.SetParent (transform);
-
-		activedPieces [x, y] = go.GetComponent<Piece> ();
-		activedPieces [x, y].setPosition (x, y);
-		activedPieces [x, y].setColor (player);
-	}
-
 	private void initBoard(){
 		spawnPiece (4, 3, WHITE_PLAYER);
 		spawnPiece (4, 4, BLACK_PLAYER);
@@ -85,6 +75,13 @@ public class BoardManager : MonoBehaviour {
 		spawnPiece (3, 4, WHITE_PLAYER);
 	}
 
+	private Vector3 getTileCenter(int x, int y){
+		Vector3 origin = Vector3.zero;
+		origin.x += (TILE_SIZE * x) + TILE_OFFSET;
+		origin.z += (TILE_SIZE * y) + TILE_OFFSET;
+
+		return origin;
+	}
 
 	private void DrawBoard(){
 		//single tile's size 1m * 8 * 8
@@ -116,14 +113,28 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
+	private void spawnPiece(int x, int y, int player){
+
+		Vector3 spawnPosition = getTileCenter (x, y);
+		Quaternion rotationState = 
+			(player == WHITE_PLAYER) ? Quaternion.identity : Quaternion.AngleAxis (180, Vector3.left);
+
+		GameObject go = Instantiate (reversiPrefab, spawnPosition, rotationState) as GameObject;
+		go.transform.SetParent (transform);
+
+		activedPieces [x, y] = go.GetComponent<Piece> ();
+		activedPieces [x, y].setPosition (x, y);
+		activedPieces [x, y].setOwner (player);
+	}
 
 
-	private Vector3 getTileCenter(int x, int y){
-		Vector3 origin = Vector3.zero;
-		origin.x += (TILE_SIZE * x) + TILE_OFFSET;
-		origin.z += (TILE_SIZE * y) + TILE_OFFSET;
 
-		return origin;
+	public bool checkArrangeVaildation(int x, int y){
+		if ((0 <= x && x < 8 ) && (0 <= y && y < 8)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 		
 	private void startAction(int x, int y, int player){
@@ -137,15 +148,10 @@ public class BoardManager : MonoBehaviour {
 
 		if (activedPieces [x, y] != null) {
 			Debug.Log ("You can't select that area");
-//			activedPieces [x, y].flipPiece ();
 			return;
 		} else {
 			Debug.Log ("current Player : " + currentPlayer);
 
-			//TODO : Check is it possible area that can spawn piece.
-			//if(checkSpawnAbility) ? true : false
-
-			// 추가됨
 			checkSpawnAbility ();
 
 			if (flipList.Count > 0) {
@@ -156,8 +162,8 @@ public class BoardManager : MonoBehaviour {
 					Debug.Log ("Item code : " + itemCode); 
 					switch (itemCode) {
 					case 1: 
-						Debug.Log ("filp activate");
-						useFilpItem (x, y);
+						Debug.Log ("flip activate");
+						useFlipItem (x, y);
 						break;
 					case 2:
 						useLineItem (x, y);
@@ -173,7 +179,7 @@ public class BoardManager : MonoBehaviour {
 						nextX = (int)flipList [0].x;
 						nextY = (int)flipList [0].z;
 						activedPieces [nextX, nextY].flipPiece ();
-						activedPieces [nextX, nextY].setColor (currentPlayer);
+						activedPieces [nextX, nextY].setOwner (currentPlayer);
 
 						flipList.RemoveAt (0);
 					}
@@ -203,11 +209,11 @@ public class BoardManager : MonoBehaviour {
 			tempY += offsetY;
 
 			while (checkArrangeVaildation (tempX, tempY) == true) {
-				if (activedPieces [tempX, tempY] != null && activedPieces [tempX, tempY].getColor () == ~currentPlayer) {
+				if (activedPieces [tempX, tempY] != null && activedPieces [tempX, tempY].getOwner () == ~currentPlayer) {
 					enemyFound = true;
 					tempX += offsetX;
 					tempY += offsetY;
-				} else if (activedPieces [tempX, tempY] != null && activedPieces [tempX, tempY].getColor () == currentPlayer && enemyFound) {
+				} else if (activedPieces [tempX, tempY] != null && activedPieces [tempX, tempY].getOwner () == currentPlayer && enemyFound) {
 					tempX -= offsetX;
 					tempY -= offsetY;
 					while (tempX != selectionX || tempY != selectionY) {
@@ -230,13 +236,6 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 			
-	public bool checkArrangeVaildation(int x, int y){
-		if ((0 <= x && x < 8 ) && (0 <= y && y < 8)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
 
 
 	public void activateItem(int itemCode){
@@ -245,7 +244,7 @@ public class BoardManager : MonoBehaviour {
 		itemActiveState = true;
 	}
 
-	private void useFilpItem(int x, int y){
+	private void useFlipItem(int x, int y){
 		for (int i = 0; i < 8; i++) {
 			int nextX = dx [i] + x;
 			int nextY = dy [i] + y;
@@ -253,15 +252,11 @@ public class BoardManager : MonoBehaviour {
 			if (checkArrangeVaildation (nextX, nextY)) {
 				if (activedPieces [nextX, nextY] != null) {
 					activedPieces [nextX, nextY].flipPiece ();
-					activedPieces [nextX, nextY].setColor (currentPlayer);
+					activedPieces [nextX, nextY].setOwner (currentPlayer);
 				}
 			}
 		}
 	}
-
-	int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
-	int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
-
 
 	private void useLineItem(int x, int y){
 		for (int i = 0; i < 8; i++) {
@@ -269,9 +264,9 @@ public class BoardManager : MonoBehaviour {
 				continue;
 			} else {
 				if (activedPieces [i, y] != null
-					&& currentPlayer != activedPieces [i, y].getColor ()) {
+					&& currentPlayer != activedPieces [i, y].getOwner ()) {
 					activedPieces [i, y].flipPiece ();
-					activedPieces [i, y].setColor (currentPlayer);
+					activedPieces [i, y].setOwner (currentPlayer);
 				}
 			}
 		}
@@ -280,9 +275,9 @@ public class BoardManager : MonoBehaviour {
 				continue;
 			} else {
 				if (activedPieces [x, i] != null
-					&& currentPlayer != activedPieces [x, i].getColor ()) {
+					&& currentPlayer != activedPieces [x, i].getOwner ()) {
 					activedPieces [x, i].flipPiece ();
-					activedPieces [x, i].setColor (currentPlayer);
+					activedPieces [x, i].setOwner (currentPlayer);
 				}
 			}
 		}

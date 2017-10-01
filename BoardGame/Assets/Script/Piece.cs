@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class Piece : MonoBehaviour {
 	
-	private const int WHITE_PIECE = 0;	
-	private const int BLACK_PIECE = -1;
+	private const int WHITE_PLAYER = 0;	
+	private const int BLACK_PLAYER = -1;
 
 	private Rigidbody rigidbody;
-	private int pieceColor;
+	private int pieceOwner;
 	private int positionX = -1;
 	private int positionY = -1;
 
@@ -17,7 +17,7 @@ public class Piece : MonoBehaviour {
 	}
 		
 	public void reversePiece(){
-		this.pieceColor = ~pieceColor;
+		this.pieceOwner = ~pieceOwner;
 	}
 
 	public void setPosition(int x, int y){
@@ -33,12 +33,12 @@ public class Piece : MonoBehaviour {
 		return positionY;
 	}
 
-	public void setColor(int playerColor){
-		pieceColor = playerColor;
+	public void setOwner(int playerColor){
+		pieceOwner = playerColor;
 	}
 
-	public int getColor(){
-		return pieceColor;
+	public int getOwner(){
+		return pieceOwner;
 	}
 
 
