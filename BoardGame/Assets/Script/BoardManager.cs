@@ -61,6 +61,10 @@ public class BoardManager : MonoBehaviour {
 		initBoard ();
 	}
 
+
+	private float nextFire = 0.0f;
+	private float fireRate = 1.8f;
+
 	private void Update(){
 		UpdateSelection ();
 		DrawBoard ();
@@ -76,7 +80,8 @@ public class BoardManager : MonoBehaviour {
 			DrawAvail ();
 		}
 			
-		if (Input.GetMouseButtonUp (0)) {
+		if (Input.GetMouseButtonUp (0) && Time.time > nextFire) {
+			nextFire = Time.time + fireRate;
 			if (controllStatus == false) {
 				Debug.Log ("cannot accept input");
 				return;
