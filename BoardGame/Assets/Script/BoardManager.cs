@@ -14,9 +14,12 @@ public class BoardManager : MonoBehaviour {
 	private int selectionX = -1;
 	private int selectionY = -1;
 
+	//추가됨. 8방향을 통틀어 뒤집을 돌 전체를 저장할 리스트
+	private List<Vector3> flipList = new List<Vector3> ();
+
+
 	private bool itemActiveState = false;
 	private int itemCode = -1;
-
 
 	public GameObject reversiPrefab;
 	public Piece[,] activedPieces{ set; get; }
@@ -29,6 +32,7 @@ public class BoardManager : MonoBehaviour {
 	private void Update(){
 		UpdateSelection ();
 		DrawBoard ();
+
 
 		if (Input.GetMouseButtonUp (0)) {
 			
@@ -113,6 +117,7 @@ public class BoardManager : MonoBehaviour {
 	}
 
 
+
 	private Vector3 getTileCenter(int x, int y){
 		Vector3 origin = Vector3.zero;
 		origin.x += (TILE_SIZE * x) + TILE_OFFSET;
@@ -123,13 +128,16 @@ public class BoardManager : MonoBehaviour {
 		
 	private void startAction(int x, int y, int player){
 
+		//추가됨
+		int nextX = 0, nextY = 0;
+
 		if (checkArrangeVaildation (x, y) == false) {
 			return;
 		}
 
 		if (activedPieces [x, y] != null) {
 			Debug.Log ("You can't select that area");
-			activedPieces [x, y].flipPiece ();
+//			activedPieces [x, y].flipPiece ();
 			return;
 		} else {
 			Debug.Log ("current Player : " + currentPlayer);
@@ -137,29 +145,91 @@ public class BoardManager : MonoBehaviour {
 			//TODO : Check is it possible area that can spawn piece.
 			//if(checkSpawnAbility) ? true : false
 
-		
-			spawnPiece (x, y, currentPlayer);
+			// 추가됨
+			checkSpawnAbility ();
 
-			if (itemActiveState == true) {
-				itemActiveState = false;
-				Debug.Log ("Item code : " + itemCode); 
-				switch (itemCode) {
-				case 1: 
-					Debug.Log ("filp activate");
-					useFilpItem (x, y);
+			if (flipList.Count > 0) {
+				spawnPiece (x, y, currentPlayer);
+
+				if (itemActiveState == true) {
+					itemActiveState = false;
+					Debug.Log ("Item code : " + itemCode); 
+					switch (itemCode) {
+					case 1: 
+						Debug.Log ("filp activate");
+						useFilpItem (x, y);
+						break;
+					case 2:
+						useLineItem (x, y);
+						break;
+					default:
+						break;
+					}
+				}
+
+				// 추가됨. 아이템이 선택되지 않았을 경우의 일반적인 경우
+				else {
+					while (flipList.Count > 0) {
+						nextX = (int)flipList [0].x;
+						nextY = (int)flipList [0].z;
+						activedPieces [nextX, nextY].flipPiece ();
+						activedPieces [nextX, nextY].setColor (currentPlayer);
+
+						flipList.RemoveAt (0);
+					}
+				}
+
+				currentPlayer = ~currentPlayer;
+			}
+		}
+	}
+
+	// 추가됨. 클릭한 타일에서 8방향의 뒤집을 돌들을 찾는 함수
+	private void checkSpawnAbility() {
+		bool enemyFound = false;
+		Vector3 flipStone = Vector3.zero;
+
+		int offsetX = 0, offsetY = 0;
+		int tempX = selectionX;
+		int tempY = selectionY;
+
+		flipList.Clear ();
+
+		for (int i = 0; i < 8; i++) {
+			offsetX = dx [i];
+			offsetY = dy [i];
+
+			tempX += offsetX;
+			tempY += offsetY;
+
+			while (checkArrangeVaildation (tempX, tempY) == true) {
+				if (activedPieces [tempX, tempY] != null && activedPieces [tempX, tempY].getColor () == ~currentPlayer) {
+					enemyFound = true;
+					tempX += offsetX;
+					tempY += offsetY;
+				} else if (activedPieces [tempX, tempY] != null && activedPieces [tempX, tempY].getColor () == currentPlayer && enemyFound) {
+					tempX -= offsetX;
+					tempY -= offsetY;
+					while (tempX != selectionX || tempY != selectionY) {
+						flipStone.x = tempX;
+						flipStone.z = tempY;
+
+						flipList.Add (flipStone);
+
+						tempX -= offsetX;
+						tempY -= offsetY;
+					} 
 					break;
-				case 2:
-					useLineItem (x, y);
-					break;
-				default:
+				} else {
 					break;
 				}
 			}
 
-			currentPlayer = ~currentPlayer;
+			tempX = selectionX;
+			tempY = selectionY;
 		}
 	}
-
+			
 	public bool checkArrangeVaildation(int x, int y){
 		if ((0 <= x && x < 8 ) && (0 <= y && y < 8)) {
 			return true;
