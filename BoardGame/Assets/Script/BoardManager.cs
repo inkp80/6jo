@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour {
 
 
 	private int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
 	private int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
-
 
 	private const int WHITE_PLAYER = 0;
 	private const int BLACK_PLAYER = -1;
@@ -22,12 +22,19 @@ public class BoardManager : MonoBehaviour {
 	//추가됨. 8방향을 통틀어 뒤집을 돌 전체를 저장할 리스트
 	private List<Vector3> flipList = new List<Vector3> ();
 
-
 	private bool itemActiveState = false;
 	private int itemCode = -1;
 
 	public GameObject reversiPrefab;
 	public Piece[,] activedPieces{ set; get; }
+
+	//추가됨. 승리한 플레이어를 표시하는 텍스트
+	public Text resultText;
+
+	//추가됨. WHITE_PLAYER의 돌 수
+	public static int whitePieces = 2;
+	//추가됨. BLACK_PLAYER의 돌 수
+	public static int blackPieces = 2;
 
 	private void Start(){
 		activedPieces = new Piece[8, 8];
@@ -175,6 +182,14 @@ public class BoardManager : MonoBehaviour {
 
 				// 추가됨. 아이템이 선택되지 않았을 경우의 일반적인 경우
 				else {
+					if (currentPlayer == 0) {
+						whitePieces = whitePieces + flipList.Count + 1;
+						blackPieces -= flipList.Count;
+					} else {
+						blackPieces = blackPieces + flipList.Count + 1;
+						whitePieces -= flipList.Count;
+					}
+
 					while (flipList.Count > 0) {
 						nextX = (int)flipList [0].x;
 						nextY = (int)flipList [0].z;
@@ -184,8 +199,26 @@ public class BoardManager : MonoBehaviour {
 						flipList.RemoveAt (0);
 					}
 				}
-
+					
 				currentPlayer = ~currentPlayer;
+
+				// 추가됨. 승리조건에 따른 메시지 출력
+				if (whitePieces == 0) {
+					resultText.text = "Black Wins!";
+					UIController.result = true;
+				} else if (blackPieces == 0) {
+					resultText.text = "White Wins!";
+					UIController.result = true;
+				} else if (whitePieces + blackPieces == 64) {
+					if (whitePieces > blackPieces) {
+						resultText.text = "White Wins!";
+					} else if (blackPieces > whitePieces) {
+						resultText.text = "Black Wins!";
+					} else {
+						resultText.text = "Draw!";
+					}
+					UIController.result = true;
+				}
 			}
 		}
 	}

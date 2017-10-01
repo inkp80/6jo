@@ -47,7 +47,7 @@ public class Piece : MonoBehaviour {
 		rigidbody.AddForce (Vector3.up * 345);
 		rigidbody.AddTorque (0, 0, 5);
 	}
-
+		
 
 //	public IEnumerator flipPiece()
 //	{
