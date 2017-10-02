@@ -4,9 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class UIController : MonoBehaviour {
-	public Text text;
 	public static bool result = false;
 	public GameObject button;
+	public Text text;
 
 	void Start () {
 		text.enabled = false;

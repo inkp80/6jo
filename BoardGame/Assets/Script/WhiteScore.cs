@@ -4,15 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class WhiteScore : MonoBehaviour {
-
-	private Text text;
+	private Text whitePiece;
 
 	void Start () {
-		text = GetComponent<Text> ();
+		whitePiece = GetComponent<Text> ();
 	}
 
 	void Update () {
-		text.text = "whitePieces : " + BoardManager.whitePieces.ToString ();
+		whitePiece.text = BoardManager.whitePieces.ToString ();
 	}
 }
 

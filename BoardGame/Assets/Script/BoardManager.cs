@@ -62,7 +62,7 @@ public class BoardManager : MonoBehaviour {
 	}
 
 
-	private float nextFire = 0.0f;
+	public static float nextFire = 0.0f;
 	private float fireRate = 1.8f;
 
 	private void Update(){
@@ -483,15 +483,7 @@ public class BoardManager : MonoBehaviour {
 
 	}
 
-	private bool pauseFlag = false;
-	public void onPauseButtonClick(){
-		nextFire = Time.time + 1.0f;
-		if (pauseFlag) {
-			pauseFlag = false;
-		} else {
-			pauseFlag = true;
-		}
-	}
+	public static bool pauseFlag = false;
 
 	private void checkPause(){
 		if (pauseFlag) {

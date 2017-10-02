@@ -4,15 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class BlackScore : MonoBehaviour {
-
-	private Text text;
+	private Text blackPiece;
 
 	void Start () {
-		text = GetComponent<Text> ();
+		blackPiece = GetComponent<Text> ();
 	}
 
 	void Update () {
-		text.text = "BlackPieces : " + BoardManager.blackPieces.ToString ();
+		blackPiece.text = BoardManager.blackPieces.ToString ();
 	}
 }
-
