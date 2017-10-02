@@ -56,6 +56,13 @@ public class BoardManager : MonoBehaviour {
 	//추가됨. BLACK_PLAYER의 돌 수
 	public static int blackPieces = 2;
 
+	public Image image1;
+	public Image image2;
+	public Text text1;
+	public Text text2;
+	public Vector2 vector1 = new Vector2(60, 60);
+	public Vector2 vector2 = new Vector2(40, 40);
+
 	private void Start(){
 		activedPieces = new Piece[8, 8];
 		initBoard ();
@@ -79,6 +86,23 @@ public class BoardManager : MonoBehaviour {
 		//추가됨
 		if (needCreate) {
 			DrawAvail ();
+		}
+
+		if (currentPlayer == WHITE_PLAYER) {
+			text1.fontSize = 50;
+			text1.color = Color.red;
+			text2.fontSize = 30;
+			text2.color = Color.black;
+
+			image1.rectTransform.sizeDelta = vector1;
+			image2.rectTransform.sizeDelta = vector2;
+		} else {
+			text1.fontSize = 30;
+			text1.color = Color.black;
+			text2.fontSize = 50;
+			text2.color = Color.red;
+			image1.rectTransform.sizeDelta = vector2;
+			image2.rectTransform.sizeDelta = vector1;
 		}
 			
 		if (Input.GetMouseButtonUp (0) && Time.time > nextFire) {
