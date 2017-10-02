@@ -355,7 +355,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &396948385
 RectTransform:
   m_ObjectHideFlags: 0
@@ -525,8 +525,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad97f5f75cdf16e4da24578cc71d6eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  button: {fileID: 2130312237}
-  text: {fileID: 1520774607}
+  returyButton: {fileID: 2130312237}
+  resultText: {fileID: 1520774607}
+  pauseText: {fileID: 396948386}
 --- !u!1 &621322499
 GameObject:
   m_ObjectHideFlags: 0
@@ -1149,6 +1150,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainLight: {fileID: 944641641}
+  pauseText: {fileID: 396948386}
 --- !u!1 &1174043103
 GameObject:
   m_ObjectHideFlags: 0

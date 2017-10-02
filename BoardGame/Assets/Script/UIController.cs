@@ -5,18 +5,20 @@ using UnityEngine.UI;
 
 public class UIController : MonoBehaviour {
 	public static bool result = false;
-	public GameObject button;
-	public Text text;
+	public GameObject returyButton;
+	public Text resultText;
+	public Text pauseText;
 
 	void Start () {
-		text.enabled = false;
-		button.SetActive (false);
+		pauseText.enabled = false;
+		resultText.enabled = false;
+		returyButton.SetActive (false);
 	}
 		
 	void Update () {
 		if (result) {
-			text.enabled = true;
-			button.SetActive(true);
+			resultText.enabled = true;
+			returyButton.SetActive(true);
 		}
 	}
 }
