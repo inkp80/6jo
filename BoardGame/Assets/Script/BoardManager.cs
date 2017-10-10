@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEditor;
 
 public class BoardManager : MonoBehaviour {
 //	public static bool controllStatus = true;
