@@ -15,3 +15,6 @@ https://www.slideshare.net/arload/flask-restful-api
 
 designing a restful-api with python and flask-restful-api
 https://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask
+
+Unity http request examples
+http://blog.naver.com/PostView.nhn?blogId=sonmg&logNo=220510568356
