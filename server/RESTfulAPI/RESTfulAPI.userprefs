@@ -1,0 +1,15 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/NewBehaviourScript1.cs">
+    <Files>
+      <File FileName="Assets/NewBehaviourScript.cs" Line="21" Column="1" />
+      <File FileName="Assets/script/RESTfulAPI.cs" Line="1" Column="1" />
+      <File FileName="Assets/GetAPI.cs" Line="21" Column="9" />
+      <File FileName="Assets/NewBehaviourScript1.cs" Line="20" Column="9" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
