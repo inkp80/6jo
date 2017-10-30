@@ -18,3 +18,7 @@ https://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-fla
 
 Unity http request examples
 http://blog.naver.com/PostView.nhn?blogId=sonmg&logNo=220510568356
+http://charlie0301.blogspot.kr/2014/03/unity-rest-api-json-library.html
+
+Scrape Websites with python
+https://www.youtube.com/watch?v=3xQTJi2tqgk
