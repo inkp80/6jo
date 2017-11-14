@@ -5,8 +5,13 @@ using UnityEngine.UI;
 using UnityEditor;
 
 public class BoardManager : MonoBehaviour {
-//	public static bool controllStatus = true;
 
+	// # Coords mapping info
+	// Board X = vector3.x / Board Y = vector3.z
+
+	//public static bool controllStatus = true;
+
+	public static bool pauseFlag = false;
 
 	private int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
 	private int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
@@ -17,7 +22,7 @@ public class BoardManager : MonoBehaviour {
 	private const float TILE_OFFSET = 0.5f;
 
 	//white player : 0 (play first) / black player : -1
-	private int currentPlayer = 0; 
+	private int currentPlayer = 0;
 	private int selectionX = -1;
 	private int selectionY = -1;
 
@@ -74,10 +79,11 @@ public class BoardManager : MonoBehaviour {
 	private float fireRate = 1.8f;
 
 	private void Update(){
+
 		checkPause ();
 		UpdateSelection ();
 		DrawBoard ();
-			
+
 		//추가됨
 		if(checkWinner) {
 			DecideWinner();
@@ -105,15 +111,24 @@ public class BoardManager : MonoBehaviour {
 			image1.rectTransform.sizeDelta = vector2;
 			image2.rectTransform.sizeDelta = vector1;
 		}
-			
+
 		if (Input.GetMouseButtonUp (0) && Time.time > nextFire) {
 			nextFire = Time.time + fireRate;
 //			if (controllStatus == false) {
 //				Debug.Log ("cannot accept input");
 //				return;
 //			}
-			
+			// if(currentPlayer == WHITE_PLAYER){
+			// 	//Player's turn (NOT AI PLAYER)
+			// 	startAction(selectionX, selectionY, currentPlayer);
+			// } else {
+			// 	//AI's turn (NOT HUMAN PLAYER)
+			// }
+
 			startAction(selectionX, selectionY, currentPlayer);
+			findCandidateCoords ();
+			Debug.Log(serializeTargetCoords());
+		
 		}
 	}
 
@@ -190,6 +205,8 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
+
+
 	//추가됨. 돌을 놓을 수 있는 타일을 찾는 함수
 	private void checkAvail(int x, int y) {
 		bool enemyFound = false;
@@ -263,8 +280,8 @@ public class BoardManager : MonoBehaviour {
 		}
 		RaycastHit hit;
 		if (Physics.Raycast (
-			   Camera.main.ScreenPointToRay (Input.mousePosition), 
-			   out hit, 
+			   Camera.main.ScreenPointToRay (Input.mousePosition),
+			   out hit,
 			   25.0f,
 			   LayerMask.GetMask ("BoardPlane"))) {
 
@@ -327,7 +344,7 @@ public class BoardManager : MonoBehaviour {
 	private void spawnPiece(int x, int y, int player){
 
 		Vector3 spawnPosition = getTileCenter (x, y);
-		Quaternion rotationState = 
+		Quaternion rotationState =
 			(player == WHITE_PLAYER) ? Quaternion.identity : Quaternion.AngleAxis (180, Vector3.left);
 
 		GameObject go = Instantiate (reversiPrefab, spawnPosition, rotationState) as GameObject;
@@ -347,7 +364,7 @@ public class BoardManager : MonoBehaviour {
 			return false;
 		}
 	}
-		
+
 	private void startAction(int x, int y, int player){
 
 		//추가됨
@@ -377,9 +394,9 @@ public class BoardManager : MonoBehaviour {
 
 				if (itemActiveState == true) {
 					itemActiveState = false;
-					Debug.Log ("Item code : " + itemCode); 
+					Debug.Log ("Item code : " + itemCode);
 					switch (itemCode) {
-					case 1: 
+					case 1:
 						Debug.Log ("flip activate");
 						useFlipItem (x, y);
 						break;
@@ -390,19 +407,18 @@ public class BoardManager : MonoBehaviour {
 						break;
 					}
 				}
-
-				// 추가됨. 아이템이 선택되지 않았을 경우의 일반적인 경우
 				else {
 					while (flipList.Count > 0) {
 						nextX = (int)flipList [0].x;
 						nextY = (int)flipList [0].z;
+
 						activedPieces [nextX, nextY].flipPiece ();
 						activedPieces [nextX, nextY].setOwner (currentPlayer);
 
 						flipList.RemoveAt (0);
 					}
 				}
-					
+
 				CountPieces ();
 				currentPlayer = ~currentPlayer;
 				needCreate = true;
@@ -445,7 +461,7 @@ public class BoardManager : MonoBehaviour {
 
 						tempX -= offsetX;
 						tempY -= offsetY;
-					} 
+					}
 					break;
 				} else {
 					break;
@@ -457,9 +473,10 @@ public class BoardManager : MonoBehaviour {
 			enemyFound = false;
 		}
 	}
-			
 
 
+
+// item handler
 	public void activateItem(int itemCode){
 		nextFire = Time.time;
 		Debug.Log ("Item Seleceted");
@@ -504,11 +521,7 @@ public class BoardManager : MonoBehaviour {
 				}
 			}
 		}
-
-
 	}
-
-	public static bool pauseFlag = false;
 
 	private void checkPause(){
 		if (pauseFlag) {
@@ -517,5 +530,60 @@ public class BoardManager : MonoBehaviour {
 			Time.timeScale = 1;
 		}
 	}
+
+
+	public void requestAiResponse(){
+		currentPlayer = BLACK_PLAYER;
+
+		string url = "http://0.0.0.0:5090/post";
+
+		WWWForm form = new WWWForm();
+
+		// board status
+		// candidate coords
+		form.AddField("coords", "");
+
+		WWW www = new WWW (url, form);
+
+		StartCoroutine(WaitForRequest(www));
+	}
+
+
+	private IEnumerator WaitForRequest(WWW www){
+		yield return www;
+
+		if (www.error == null) {
+			// request completed
+			Debug.Log (www.text);
+			currentPlayer = WHITE_PLAYER;
+		} else {
+			// error
+			Debug.Log ("WWW error: " + www.error);
+		}
+	}
+
+	private void findCandidateCoords(){
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if(activedPieces [i, j] != null && activedPieces [i, j].getOwner() == currentPlayer) {
+					checkAvail (i, j);
+				}
+			}
+		}
+	}
+
+	private string serializeTargetCoords(){
+		string serializedCoords;
+		foreach (var targetCoord in availList) {
+			int xCoord = targetCoord.x
+			int yCoord = targetCoord.z
+			serializedCoords += (xCoord * 8 + yCoord);
+			serializedCoords += ',';
+		}
+
+		availList.clear();
+		return serializedCoords;
+	}
+
 
 }
