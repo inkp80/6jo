@@ -41,7 +41,7 @@ if  __name__  ==  "__main__" :
                     action = players[i].selectAction(state, targets, players[i].exploration)
                     
                     # 행동을 실행
-                    env.doFlip(action, playerID[i])
+                    env.doFlip([action//8, action%8], playerID[i])
                         
                     # 종료 판정
                     win = env.winner () # 현재 유리한 플레이어
@@ -49,11 +49,10 @@ if  __name__  ==  "__main__" :
                         
                     # 다음 상태
                     state_X = env.screen
-                    target_X = env.getEnables(playerID[i + 1 ])
+                    target_X = env.getEnables(playerID[i + 1])
                     if  len (target_X) ==  0 :
                         target_X = env.getEnables(playerID[i])
                         
-                    # 양자 교육
                     reward =  0
                     if end == True :
                         reward = 1
@@ -64,7 +63,7 @@ if  __name__  ==  "__main__" :
                     # for log
                     loss = players[i].current_loss
                     Q_max, Q_action = players[i].selectEnableAction (state, targets)
-                    print("player:{:1d} | pos:[{:d}][{:d}] | LOSS: {:.4f} | Q_MAX: {:.4f}".format(playerID[i], action[0], action[1], loss, Q_max))
+                    print("player:{:1d} | pos:[{:d}][{:d}] | LOSS: {:.4f} | Q_MAX: {:.4f}".format(playerID[i], action//8, action%8, loss, Q_max))
 
                 # 행동을 실행 한 결과
                 terminal = env.isEnd()     

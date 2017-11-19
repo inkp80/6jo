@@ -86,11 +86,7 @@ class DQNAgent :
     def selectAction (self, state, targets, epsilon) :
         if np.random.rand () <= epsilon :
             # random
-            randomTargets = []
-            for i in targets :
-                randomTargets.insert(0, i[0] * 8 + i[1])
-            action = np.random.choice(randomTargets)
-            return [action // 8, action % 8]
+            return np.random.choice(targets)
         else :
             # max_action Q (state, action)
             qvalue, action = self.selectEnableAction(state, targets)
@@ -102,12 +98,12 @@ class DQNAgent :
         # descend = np.sort (Qs)
         index = np.argsort(Qs) # 값이 제일 작은 것의 index순으로 정렬  
         for action in reversed(index) :
-            if [action//8, action%8] in targets :
+            if action in targets :
                 break 
         # max_action Q (state, action)
         qvalue = Qs[action]
 
-        return qvalue, [action//8, action%8]
+        return qvalue, action
         
     def storeExperience (self, state, targets, action, reward, state_1, targets_1, terminal) :
         self.replayMemory.append ((state, targets, action, reward, state_1, targets_1, terminal))
@@ -127,15 +123,14 @@ class DQNAgent :
 
         for j in minibatch_indexes :
             state_j, targets_j, action_j, reward_j, state_j_1, targets_j_1, terminal = self.replayMemory[j]
-            action_j_index = action_j[0] * 8 + action_j[1]
             y_j = self.Qvalues(state_j)
 
             if terminal :
-                y_j[action_j_index] = reward_j
+                y_j[action_j] = reward_j
             else :
                 # reward_j + gamma * max_action 'Q (state'action ')
                 qvalue, action =  self.selectEnableAction (state_j_1, targets_j_1)
-                y_j [action_j_index] = reward_j + self.discountFactor * qvalue
+                y_j [action_j] = reward_j + self.discountFactor * qvalue
 
             state_minibatch.append (state_j)
             y_minibatch.append (y_j)

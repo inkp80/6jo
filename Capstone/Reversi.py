@@ -78,7 +78,7 @@ class Reversi :
         for i in range(64) :
             if self.getCell(i//8, i%8) == self.blank :
                 if len(self.flipList([i//8, i%8], color)) > 0 :
-                    result.insert(0, [i//8, i%8])
+                    result.insert(0, i)
                     
         return result
                 
