@@ -13,9 +13,8 @@ import tensorflow as tf
 
 class DQNAgent :
 
-    def __init__ (self, pathName, rows, cols) :
+    def __init__ (self, pathName, rows, cols, name) :
         tf.reset_default_graph()
-        
         self.rows = rows
         self.cols = cols
         
@@ -27,8 +26,6 @@ class DQNAgent :
         self.replayMemorySize = 6000
         self.learningRate = 0.01
         self.discountFactor = 0.9
-        
-        self.exploration = 0.1
         
         self.currentLoss = 0.0
         
@@ -74,10 +71,9 @@ class DQNAgent :
         # saver
         self.saver = tf.train.Saver()
         
-        # session
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
-
+        
         # y가 2차원 배열로 리턴되므로 (1,64) [0]번째만 반환 
     def Qvalues (self, state) :
         # Q (state, action) of all actions
@@ -107,10 +103,8 @@ class DQNAgent :
         
     def storeExperience (self, state, targets, action, reward, state_1, targets_1, terminal) :
         self.replayMemory.append ((state, targets, action, reward, state_1, targets_1, terminal))
-
-
-
-
+        if len(self.replayMemory) > self.replayMemorySize :
+            self.replayMemory.popleft()
 
     def experienceReplay (self) :
         state_minibatch = []
@@ -139,7 +133,7 @@ class DQNAgent :
         self.sess.run(self.training, feed_dict = {self.inputX : state_minibatch, self.y : y_minibatch})
 
         # for log
-        self.current_loss = self.sess.run(self.loss, feed_dict = { self.inputX : state_minibatch, self.y : y_minibatch})
+        self.currentLoss = self.sess.run(self.loss, feed_dict = {self.inputX : state_minibatch, self.y : y_minibatch})
 
 
     def loadModel (self, model_path = None) :
