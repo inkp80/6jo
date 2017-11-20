@@ -3,8 +3,8 @@
 from Reversi2 import Reversi
 from randomPlay import randomAgent
 from alphaBetaAI import alphaBetaAgent
+#from dqn_agent3 import DQNAgent
 import copy
-import numpy as np
 
 '''
 env.printScreen() 주석처리 되어 있음 
@@ -25,7 +25,9 @@ if  __name__  ==  "__main__" :
     for episode in range(max_episodes):
         env = Reversi()
         randomagent = randomAgent()
+        #dqnAI = DQNAgent( 8 , 8, False)
         alphabeta_agent = alphaBetaAgent(2)
+        
     # game
         print ( " ------------- GAME START --------------- ",episode )
         while  not env.isEnd () :

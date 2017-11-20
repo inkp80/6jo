@@ -14,52 +14,56 @@ import tensorflow as tf
 import random
 
 class DQNAgent :
-    def __init__ ( self ,  rows , cols ) :
+    def __init__ ( self ,  rows , cols, flag ) :
+        """
+        rows : 행
+        cols : 열
+        flag : is Train? train일경우 true, fightwithAI일 경우 false
+        """
+        #tensorflow 그래프 초기화 
+        tf.reset_default_graph()
+    
+        #오델로 rows, cols
+        self.rows= rows
+        self.cols = cols
+        self.flag = flag
+        #===============deep q leraning 뉴럴네트워크 위한 값들 설정=====================#
+         
+        self.minibatchsize = 20
+        self.replayMemorySize = 600
         
-         #tensorflow 그래프 초기화 
-         tf.reset_default_graph()
-
-         #오델로 rows, cols
-         self.rows= rows
-         self.cols = cols
+        self.learningRate =  0.1
+        
+        self.discountFactor = 0.9
+        
+        self.exploration = 0.1
+    
+        self.currentLoss=0
+        #================Q network 변수들===================================#
          
-         #===============deep q leraning 뉴럴네트워크 위한 값들 설정=====================#
+        #2차원 배열을 입력으로 받음 
+        self.inputX = tf.placeholder (tf.float32, [None , self.rows, self.cols])
          
-         self.minibatchsize = 20
-         self.replayMemorySize = 600
-         
-         self.learningRate =  0.1
-         
-         self.discountFactor = 0.9
-         
-         self.exploration = 0.1
-     
-         self.currentLoss=0
-         #================Q network 변수들===================================#
-         
-         #2차원 배열을 입력으로 받음 
-         self.inputX = tf.placeholder (tf.float32, [None , self.rows, self.cols])
-         
-         self._Y = tf.placeholder(tf.float32, [None , 64])
-         #size = 64
-         self.node_size = 64
+        self._Y = tf.placeholder(tf.float32, [None , 64])
+        #size = 64
+        self.node_size = 64
             
          
-         #replay memory
-         self.replayMemory = deque(maxlen=self.replayMemorySize)
+        #replay memory
+        self.replayMemory = deque(maxlen=self.replayMemorySize)
          
-         #모델 초기화
-         self.mainQ = self.initModel('main1')
+        #모델 초기화
+        self.mainQ = self.initModel('main1')
          
-         self.targetQ = self.initModel('target')
+        self.targetQ = self.initModel('target')
          
-         self.loss, self.training = self.buildOperation()
+        self.loss, self.training = self.buildOperation()
          
-         #session & saver
-         self.saver= tf.train.Saver()
-         self.sess = tf.Session()
+        #session & saver
+        self.saver= tf.train.Saver()
+        self.sess = tf.Session()
         
-         self.sess.run(tf.global_variables_initializer())
+        self.sess.run(tf.global_variables_initializer())
          
     def initModel(self,name):
         with tf.variable_scope(name):
@@ -95,8 +99,8 @@ class DQNAgent :
         #loss(cost) function
         loss = tf.reduce_mean(tf.square (self.mainQ -  self._Y))
          #train operation
-        optimizer = tf.train.RMSPropOptimizer ( self.learningRate)
-        training = optimizer.minimize(loss)
+        optimizer = tf.train.AdamOptimizer ( self.learningRate) #이게 성능 더 좋음 https://arxiv.org/pdf/1412.6980.pdf
+        training = optimizer.minimize(loss) 
        
         return loss, training
      
@@ -111,6 +115,18 @@ class DQNAgent :
     def selectAction(self, state, targets,epsilon):
         
         if np.random.rand() <=epsilon:
+            
+            if self.flag is True:
+                #오델로 전략
+                if targets.count(0) != 0:
+                    return 0 #######################################action 데이터 타 integer 맞음?
+                elif targets.count(7) != 0:
+                    return 7
+                elif targets.count(56) != 0:
+                    return 56
+                elif targets.count(63) != 0:
+                    return 63
+            
             return np.random.choice(targets)
         else:
             qvalue, action = self.selectEnableAction(state, targets)

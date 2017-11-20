@@ -5,7 +5,6 @@ Created on Wed Nov 15 21:07:45 2017
 @author: bkd
 """
 
-import os
 import copy
 import numpy as np
 
@@ -109,9 +108,7 @@ class Reversi :
         
         if len(b) == 0 and len(w) == 0:
             return True
-        
-        # 여기 코드 빠졌음. 넣어야 되나 말아야 되나 고민해라
-        
+    
         return False
         
     def printScreen(self) :

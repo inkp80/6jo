@@ -15,7 +15,7 @@ if  __name__  ==  "__main__" :
     counter = 0 #dqn ai가 이긴 횟수  
     
     #dqn AI  여기서는 검은색 돌
-    dqnAI = DQNAgent( 8 , 8)
+    dqnAI = DQNAgent( 8 , 8, True)
    
     #알파베타 ai는 흰색 돌 
     alphabetaAI = alphaBetaAgent(2)
