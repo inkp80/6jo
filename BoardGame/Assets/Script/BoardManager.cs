@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
 
 public class BoardManager : MonoBehaviour {
+	//	public static bool controllStatus = true;
+	//18-220-106-253
+	private const string SERVER_URL = "http://18.220.106.253:5090/post";
 
-	// # Coords mapping info
-	// Board X = vector3.x / Board Y = vector3.z
-
-	//public static bool controllStatus = true;
-
-	public static bool pauseFlag = false;
+	private bool AIMODE = true;
 
 	private int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
 	private int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
@@ -22,7 +19,7 @@ public class BoardManager : MonoBehaviour {
 	private const float TILE_OFFSET = 0.5f;
 
 	//white player : 0 (play first) / black player : -1
-	private int currentPlayer = 0;
+	private int currentPlayer = 0; 
 	private int selectionX = -1;
 	private int selectionY = -1;
 
@@ -79,7 +76,6 @@ public class BoardManager : MonoBehaviour {
 	private float fireRate = 1.8f;
 
 	private void Update(){
-
 		checkPause ();
 		UpdateSelection ();
 		DrawBoard ();
@@ -113,22 +109,19 @@ public class BoardManager : MonoBehaviour {
 		}
 
 		if (Input.GetMouseButtonUp (0) && Time.time > nextFire) {
-			nextFire = Time.time + fireRate;
-//			if (controllStatus == false) {
-//				Debug.Log ("cannot accept input");
-//				return;
-//			}
-			// if(currentPlayer == WHITE_PLAYER){
-			// 	//Player's turn (NOT AI PLAYER)
-			// 	startAction(selectionX, selectionY, currentPlayer);
-			// } else {
-			// 	//AI's turn (NOT HUMAN PLAYER)
-			// }
 
-			startAction(selectionX, selectionY, currentPlayer);
-			findCandidateCoords ();
-			Debug.Log(serializeTargetCoords());
-		
+			if (AIMODE == true) {
+				if (currentPlayer == WHITE_PLAYER) {
+					nextFire = Time.time + fireRate;
+					startAction (selectionX, selectionY, currentPlayer);
+					sendAiRequest ();
+				} else {
+					//do nothing -
+				}
+			} else if(AIMODE == false) {
+				nextFire = Time.time + fireRate;
+				startAction(selectionX, selectionY, currentPlayer);
+			}
 		}
 	}
 
@@ -205,8 +198,6 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
-
-
 	//추가됨. 돌을 놓을 수 있는 타일을 찾는 함수
 	private void checkAvail(int x, int y) {
 		bool enemyFound = false;
@@ -280,14 +271,14 @@ public class BoardManager : MonoBehaviour {
 		}
 		RaycastHit hit;
 		if (Physics.Raycast (
-			   Camera.main.ScreenPointToRay (Input.mousePosition),
-			   out hit,
-			   25.0f,
-			   LayerMask.GetMask ("BoardPlane"))) {
+			Camera.main.ScreenPointToRay (Input.mousePosition), 
+			out hit, 
+			25.0f,
+			LayerMask.GetMask ("BoardPlane"))) {
 
 			selectionX = (int)hit.point.x;
 			selectionY = (int)hit.point.z;
-//			Debug.Log (hit.point);
+			//			Debug.Log (hit.point);
 		} else {
 			selectionX = -1;
 			selectionY = -1;
@@ -317,7 +308,7 @@ public class BoardManager : MonoBehaviour {
 		Vector3 heightLine = Vector3.forward * 8;
 
 
-//		drawing checker box
+		//		drawing checker box
 		for (int i = 0; i <= 8; i++) {
 			Vector3 start = Vector3.forward * i;
 			Debug.DrawLine (start, start + widthLine);
@@ -338,15 +329,16 @@ public class BoardManager : MonoBehaviour {
 				Vector3.forward * (selectionY + 1) + Vector3.right * selectionX,
 				Vector3.forward * selectionY + Vector3.right * (selectionX + 1)
 			);
+			//			Debug.Log (selectionX + ", " + selectionY);
 		}
 	}
 
 	private void spawnPiece(int x, int y, int player){
 
 		Vector3 spawnPosition = getTileCenter (x, y);
-		Quaternion rotationState =
-			(player == WHITE_PLAYER) ? Quaternion.identity : Quaternion.AngleAxis (180, Vector3.left);
-
+		Quaternion rotationState = 
+			(player == WHITE_PLAYER) ? Quaternion.AngleAxis(180, Vector3.up) : Quaternion.AngleAxis (180, Vector3.left);
+	
 		GameObject go = Instantiate (reversiPrefab, spawnPosition, rotationState) as GameObject;
 		go.transform.SetParent (transform);
 
@@ -366,8 +358,6 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	private void startAction(int x, int y, int player){
-
-		//추가됨
 		int nextX = 0, nextY = 0;
 
 		if (checkArrangeVaildation (x, y) == false) {
@@ -375,28 +365,28 @@ public class BoardManager : MonoBehaviour {
 		}
 
 		if (activedPieces [x, y] != null) {
-			Debug.Log ("You can't select that area");
+			Debug.Log ("You can't select that position");
 			return;
 		} else {
-			Debug.Log ("current Player : " + currentPlayer);
+			checkSpawnAbility (x, y);
 
-			checkSpawnAbility ();
+			if (currentPlayer == BLACK_PLAYER) {
+				Debug.Log ("flip count : " + flipList.Count);
+				Debug.Log ("x : " + x + ", y: " + y);
+			}
 
 			if (flipList.Count > 0) {
-				//controllStatus = false;
-
 				while (removalList.Count > 0) {
 					Destroy (removalList[0]);
 					removalList.RemoveAt (0);
 				}
-
 				spawnPiece (x, y, currentPlayer);
 
 				if (itemActiveState == true) {
 					itemActiveState = false;
-					Debug.Log ("Item code : " + itemCode);
+					Debug.Log ("Item code : " + itemCode); 
 					switch (itemCode) {
-					case 1:
+					case 1: 
 						Debug.Log ("flip activate");
 						useFlipItem (x, y);
 						break;
@@ -406,19 +396,16 @@ public class BoardManager : MonoBehaviour {
 					default:
 						break;
 					}
-				}
-				else {
+				} else {
 					while (flipList.Count > 0) {
 						nextX = (int)flipList [0].x;
 						nextY = (int)flipList [0].z;
-
 						activedPieces [nextX, nextY].flipPiece ();
 						activedPieces [nextX, nextY].setOwner (currentPlayer);
 
 						flipList.RemoveAt (0);
 					}
 				}
-
 				CountPieces ();
 				currentPlayer = ~currentPlayer;
 				needCreate = true;
@@ -428,13 +415,13 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	// 추가됨. 클릭한 타일에서 8방향의 뒤집을 돌들을 찾는 함수
-	private void checkSpawnAbility() {
+	private void checkSpawnAbility(int xCoords, int yCoords) {
 		bool enemyFound = false;
 		Vector3 flipStone = Vector3.zero;
 
 		int offsetX = 0, offsetY = 0;
-		int tempX = selectionX;
-		int tempY = selectionY;
+		int tempX = xCoords;
+		int tempY = yCoords;
 
 		flipList.Clear ();
 
@@ -453,7 +440,10 @@ public class BoardManager : MonoBehaviour {
 				} else if (activedPieces [tempX, tempY] != null && activedPieces [tempX, tempY].getOwner () == currentPlayer && enemyFound) {
 					tempX -= offsetX;
 					tempY -= offsetY;
-					while (tempX != selectionX || tempY != selectionY) {
+					while (tempX != xCoords || tempY != yCoords) {
+						if (currentPlayer == BLACK_PLAYER) {
+							Debug.Log ("founded!!!");
+						}
 						flipStone.x = tempX;
 						flipStone.z = tempY;
 
@@ -468,15 +458,14 @@ public class BoardManager : MonoBehaviour {
 				}
 			}
 
-			tempX = selectionX;
-			tempY = selectionY;
+			tempX = xCoords;
+			tempY = yCoords;
 			enemyFound = false;
 		}
 	}
 
 
 
-// item handler
 	public void activateItem(int itemCode){
 		nextFire = Time.time;
 		Debug.Log ("Item Seleceted");
@@ -521,7 +510,11 @@ public class BoardManager : MonoBehaviour {
 				}
 			}
 		}
+
+
 	}
+
+	public static bool pauseFlag = false;
 
 	private void checkPause(){
 		if (pauseFlag) {
@@ -532,37 +525,63 @@ public class BoardManager : MonoBehaviour {
 	}
 
 
-	public void requestAiResponse(){
-		currentPlayer = BLACK_PLAYER;
 
-		string url = "http://0.0.0.0:5090/post";
-
+	public void sendAiRequest(){
 		WWWForm form = new WWWForm();
-
-		// board status
-		// candidate coords
-		form.AddField("coords", "");
-
-		WWW www = new WWW (url, form);
-
+		form.AddField("status", getBoardStatus());
+		form.AddField ("target", getAvailPosition ());
+		WWW www = new WWW (SERVER_URL, form);
 		StartCoroutine(WaitForRequest(www));
 	}
 
 
-	private IEnumerator WaitForRequest(WWW www){
+	IEnumerator WaitForRequest(WWW www)
+	{
 		yield return www;
 
-		if (www.error == null) {
-			// request completed
-			Debug.Log (www.text);
-			currentPlayer = WHITE_PLAYER;
-		} else {
-			// error
+		if (www.error == null)
+		{
+			// request completed!
+			//			Debug.Log (www.text);
+			Pair<int, int> coords = convert2TwoD(int.Parse(www.text));
+
+			Debug.Log("result from server : " + www.text);
+			//fire AI action
+			yield return new WaitForSeconds(3);
+			//			if (Time.time > nextFire) {
+			//				nextFire = Time.time + fireRate;
+			startAction (coords.First, 7 - coords.Second, currentPlayer);
+			//			}
+		}
+		else
+		{
+			// something wrong!
 			Debug.Log ("WWW error: " + www.error);
 		}
 	}
 
-	private void findCandidateCoords(){
+	private string getBoardStatus(){
+		string boardStatus = "";
+		for (int row = 7; row >= 0; row--) {
+			for (int col = 0; col < 8; col++) {
+				Piece currentPiece = activedPieces [col, row];
+
+				if (currentPiece == null) {
+					boardStatus += 0;
+				} else if (currentPiece.getOwner() == WHITE_PLAYER) {
+					boardStatus += 2;
+				} else if(currentPiece.getOwner() == BLACK_PLAYER){
+					boardStatus += 1;
+				}
+			}
+		}
+		return boardStatus;
+	}
+
+	private string getAvailPosition(){
+		string availPos = "";
+		availList.Clear ();
+
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				if(activedPieces [i, j] != null && activedPieces [i, j].getOwner() == currentPlayer) {
@@ -570,20 +589,40 @@ public class BoardManager : MonoBehaviour {
 				}
 			}
 		}
-	}
 
-	private string serializeTargetCoords(){
-		string serializedCoords;
-		foreach (var targetCoord in availList) {
-			int xCoord = targetCoord.x
-			int yCoord = targetCoord.z
-			serializedCoords += (xCoord * 8 + yCoord);
-			serializedCoords += ',';
+		//		Debug.Log (availList.Count);
+		while(availList.Count != 0){
+			int xCoord = (int) availList [0].x;
+			int yCoord = (int) availList [0].z;
+			availPos += (convert2OneD(new Pair<int, int>(xCoord, yCoord)) + ",");
+			availList.RemoveAt (0);
 		}
 
-		availList.clear();
-		return serializedCoords;
+		return availPos;
 	}
 
+	private Pair<int, int> convert2TwoD(int posValue){
+		int posVal = posValue;
+		int yCoord = posVal / 8;
+		int xCoord = posVal % 8;
+		return new Pair<int,int> (xCoord, yCoord);
+	}
 
+	private int convert2OneD(Pair<int, int> coords){
+		return coords.First + ((8 - (coords.Second+1)) * 8);
+	}
 }
+
+public class Pair<T, U> { 
+	public Pair() { 
+	} 
+
+	public Pair(T first, U second) { 
+		this.First = first; 
+		this.Second = second; 
+	} 
+
+
+	public T First { get; set; } 
+	public U Second { get; set; } 
+}; 

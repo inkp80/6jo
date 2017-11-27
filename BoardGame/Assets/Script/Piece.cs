@@ -44,7 +44,7 @@ public class Piece : MonoBehaviour {
 
 	public void flipPiece(){
 //		rigidbody.MoveRotation (Quaternion.AngleAxis (180, Vector3.left));
-		rigidbody.AddForce (Vector3.up * 345);
+		rigidbody.AddForce (Vector3.up * 405);
 		rigidbody.AddTorque (0, 0, 5);
 	}
 		
