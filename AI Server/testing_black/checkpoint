@@ -1,0 +1,2 @@
+model_checkpoint_path: "blackModel.ckpt"
+all_model_checkpoint_paths: "blackModel.ckpt"

@@ -1,0 +1,53 @@
+public void noOption(){
+		string url = "http://0.0.0.0:5090/post";
+		WWWForm form = new WWWForm();
+		form.AddField("title", "Hello Unity!");
+		WWW www = new WWW (url, form);
+		StartCoroutine(WaitForRequest(www));
+	}
+
+
+	IEnumerator WaitForRequest(WWW www)
+	{
+		yield return www;
+
+		if (www.error == null)
+		{
+			// request completed!
+			aiStatus = true;
+			Debug.Log (www.text);
+		}
+		else
+		{
+			// something wrong!
+			Debug.Log ("WWW error: " + www.error);
+		}
+
+	}
+
+
+  ----
+
+Unity - find target cells
+  private void findCandidateCoords(){
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if(activedPieces [i, j] != null && activedPieces [i, j].getOwner() == currentPlayer) {
+					checkAvail (i, j);
+				}
+			}
+		}
+	}
+
+	private string serializeTargetCoords(){
+		string serializedCoords = "";
+		foreach (var targetCoord in availList) {
+			float xCoord = targetCoord.x;
+			float yCoord = targetCoord.z;
+			serializedCoords += ((int)(xCoord * 8 + yCoord));
+			serializedCoords += ',';
+		}
+
+		availList.Clear ();
+		return serializedCoords;
+	}
