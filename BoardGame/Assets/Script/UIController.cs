@@ -9,7 +9,12 @@ public class UIController : MonoBehaviour {
 	public Text resultText;
 	public Text pauseText;
 
+	public Button resumeButton;
+	public Button terminateButton;
+
 	void Start () {
+		resumeButton.gameObject.SetActive (false);
+		terminateButton.gameObject.SetActive (false);
 		pauseText.enabled = false;
 		resultText.enabled = false;
 		returyButton.SetActive (false);

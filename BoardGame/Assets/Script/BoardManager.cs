@@ -5,10 +5,10 @@ using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour {
 	//	public static bool controllStatus = true;
-	//18-220-106-253
-	private const string SERVER_URL = "http://18.220.106.253:5090/post";
-
+	// private const string SERVER_URL = "http://18.220.106.253:5090/post";
+private const string SERVER_URL = "http://0.0.0.0:5090/post";
 	private bool AIMODE = true;
+	bool serverAiActionRequestResult = false;
 
 	private int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
 	private int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 };
@@ -19,7 +19,7 @@ public class BoardManager : MonoBehaviour {
 	private const float TILE_OFFSET = 0.5f;
 
 	//white player : 0 (play first) / black player : -1
-	private int currentPlayer = 0; 
+	private int currentPlayer = 0;
 	private int selectionX = -1;
 	private int selectionY = -1;
 
@@ -69,6 +69,7 @@ public class BoardManager : MonoBehaviour {
 	private void Start(){
 		activedPieces = new Piece[8, 8];
 		initBoard ();
+		currentPlayer = BLACK_PLAYER;
 	}
 
 
@@ -89,40 +90,46 @@ public class BoardManager : MonoBehaviour {
 		//추가됨
 		if (needCreate) {
 			DrawAvail ();
+
+			//	DrawAvail
+			//	1. check is there any skiped turn
+			//	2. count and draw avail position marker(red obj)
+			//	3. if DrawAvail is called, needCreate return to fail;
 		}
+	
+		activateCurrentTurn ();
+	}
 
-		if (currentPlayer == WHITE_PLAYER) {
-			text1.fontSize = 50;
-			text1.color = Color.red;
-			text2.fontSize = 30;
-			text2.color = Color.black;
+	private void activateCurrentTurn(){
 
-			image1.rectTransform.sizeDelta = vector1;
-			image2.rectTransform.sizeDelta = vector2;
-		} else {
-			text1.fontSize = 30;
-			text1.color = Color.black;
-			text2.fontSize = 50;
-			text2.color = Color.red;
-			image1.rectTransform.sizeDelta = vector2;
-			image2.rectTransform.sizeDelta = vector1;
-		}
-
-		if (Input.GetMouseButtonUp (0) && Time.time > nextFire) {
-
-			if (AIMODE == true) {
-				if (currentPlayer == WHITE_PLAYER) {
-					nextFire = Time.time + fireRate;
-					startAction (selectionX, selectionY, currentPlayer);
-					sendAiRequest ();
-				} else {
-					//do nothing -
-				}
-			} else if(AIMODE == false) {
-				nextFire = Time.time + fireRate;
-				startAction(selectionX, selectionY, currentPlayer);
+		if (AIMODE == true) {
+			if (serverAiActionRequestResult == false && currentPlayer == WHITE_PLAYER) {
+				sendAiRequest ();
+			} else if (currentPlayer == BLACK_PLAYER) {
+				serverAiActionRequestResult = false;
+				getUserInput ();
 			}
+		} else if (AIMODE == false) {
+			getUserInput ();
 		}
+	}
+
+
+	private void getUserInput(){
+		if (Input.GetMouseButtonUp (0) && Time.time > nextFire) {
+			nextFire = Time.time + fireRate;
+			startAction (selectionX, selectionY, currentPlayer);
+		}
+	}
+
+	IEnumerator noticeTo(int player){
+		//StartCoroutine(noticePlayersTurn(player);	
+		//do action;
+		resultText.text = "No place to select!\nPass to next player";
+		resultText.enabled = true;
+		yield return new WaitForSeconds (1.0f);
+		resultText.enabled = false;
+
 	}
 
 	// 추가됨. 승리조건에 따른 메시지 출력
@@ -147,6 +154,7 @@ public class BoardManager : MonoBehaviour {
 			needCreate = false;
 		}
 	}
+
 
 	// 추가됨. 돌을 놓을수 있는 곳을 표시
 	private void DrawAvail() {
@@ -188,9 +196,11 @@ public class BoardManager : MonoBehaviour {
 			if (currentPlayer == 0) {
 				whiteTurnSkip = true;
 				print ("white가 놓을 곳이 없음. black 턴으로 이동");
+				StartCoroutine(noticeTo(currentPlayer));
 			} else {
 				blackTurnSkip = true;
 				print ("black이 놓을 곳이 없음. white 턴으로 이동");
+				StartCoroutine(noticeTo(currentPlayer));
 			}
 			currentPlayer = ~currentPlayer;
 			needCreate = true;
@@ -271,8 +281,8 @@ public class BoardManager : MonoBehaviour {
 		}
 		RaycastHit hit;
 		if (Physics.Raycast (
-			Camera.main.ScreenPointToRay (Input.mousePosition), 
-			out hit, 
+			Camera.main.ScreenPointToRay (Input.mousePosition),
+			out hit,
 			25.0f,
 			LayerMask.GetMask ("BoardPlane"))) {
 
@@ -287,11 +297,11 @@ public class BoardManager : MonoBehaviour {
 
 
 	private void initBoard(){
-		spawnPiece (4, 3, WHITE_PLAYER);
-		spawnPiece (4, 4, BLACK_PLAYER);
+		spawnPiece (4, 3, BLACK_PLAYER);
+		spawnPiece (4, 4, WHITE_PLAYER);
 
-		spawnPiece (3, 3, BLACK_PLAYER);
-		spawnPiece (3, 4, WHITE_PLAYER);
+		spawnPiece (3, 3, WHITE_PLAYER);
+		spawnPiece (3, 4, BLACK_PLAYER);
 	}
 
 	private Vector3 getTileCenter(int x, int y){
@@ -336,9 +346,9 @@ public class BoardManager : MonoBehaviour {
 	private void spawnPiece(int x, int y, int player){
 
 		Vector3 spawnPosition = getTileCenter (x, y);
-		Quaternion rotationState = 
-			(player == WHITE_PLAYER) ? Quaternion.AngleAxis(180, Vector3.up) : Quaternion.AngleAxis (180, Vector3.left);
-	
+		Quaternion rotationState =
+			(player == BLACK_PLAYER) ? Quaternion.AngleAxis(180, Vector3.up) : Quaternion.AngleAxis (180, Vector3.left);
+
 		GameObject go = Instantiate (reversiPrefab, spawnPosition, rotationState) as GameObject;
 		go.transform.SetParent (transform);
 
@@ -384,9 +394,9 @@ public class BoardManager : MonoBehaviour {
 
 				if (itemActiveState == true) {
 					itemActiveState = false;
-					Debug.Log ("Item code : " + itemCode); 
+					Debug.Log ("Item code : " + itemCode);
 					switch (itemCode) {
-					case 1: 
+					case 1:
 						Debug.Log ("flip activate");
 						useFlipItem (x, y);
 						break;
@@ -466,6 +476,27 @@ public class BoardManager : MonoBehaviour {
 
 
 
+	public void setPlayerTurnUI(int currentPlayer) {
+			if (currentPlayer == BLACK_PLAYER) {
+				text1.fontSize = 50;
+				text1.color = Color.red;
+				text2.fontSize = 30;
+				text2.color = Color.black;
+
+				image1.rectTransform.sizeDelta = vector1;
+				image2.rectTransform.sizeDelta = vector2;
+			} else {
+				text1.fontSize = 30;
+				text1.color = Color.black;
+				text2.fontSize = 50;
+				text2.color = Color.red;
+				image1.rectTransform.sizeDelta = vector2;
+				image2.rectTransform.sizeDelta = vector1;
+			}
+	}
+
+
+
 	public void activateItem(int itemCode){
 		nextFire = Time.time;
 		Debug.Log ("Item Seleceted");
@@ -516,7 +547,7 @@ public class BoardManager : MonoBehaviour {
 
 	public static bool pauseFlag = false;
 
-	private void checkPause(){
+	public void checkPause(){
 		if (pauseFlag) {
 			Time.timeScale = 0;
 		} else {
@@ -534,29 +565,23 @@ public class BoardManager : MonoBehaviour {
 		StartCoroutine(WaitForRequest(www));
 	}
 
-
 	IEnumerator WaitForRequest(WWW www)
 	{
+		serverAiActionRequestResult = true;
 		yield return www;
 
 		if (www.error == null)
 		{
-			// request completed!
-			//			Debug.Log (www.text);
-			Pair<int, int> coords = convert2TwoD(int.Parse(www.text));
+			Pair<int, int> coords = convertOneD2TwoD(int.Parse(www.text));
 
 			Debug.Log("result from server : " + www.text);
-			//fire AI action
+			// Fire AI action after 3 sec.
 			yield return new WaitForSeconds(3);
-			//			if (Time.time > nextFire) {
-			//				nextFire = Time.time + fireRate;
 			startAction (coords.First, 7 - coords.Second, currentPlayer);
-			//			}
-		}
-		else
-		{
-			// something wrong!
+		} else {
+			// Something wrong!
 			Debug.Log ("WWW error: " + www.error);
+			serverAiActionRequestResult = false;
 		}
 	}
 
@@ -594,35 +619,35 @@ public class BoardManager : MonoBehaviour {
 		while(availList.Count != 0){
 			int xCoord = (int) availList [0].x;
 			int yCoord = (int) availList [0].z;
-			availPos += (convert2OneD(new Pair<int, int>(xCoord, yCoord)) + ",");
+			availPos += (convertTwoD2OneD(new Pair<int, int>(xCoord, yCoord)) + ",");
 			availList.RemoveAt (0);
 		}
 
 		return availPos;
 	}
 
-	private Pair<int, int> convert2TwoD(int posValue){
+	private Pair<int, int> convertOneD2TwoD(int posValue){
 		int posVal = posValue;
 		int yCoord = posVal / 8;
 		int xCoord = posVal % 8;
 		return new Pair<int,int> (xCoord, yCoord);
 	}
 
-	private int convert2OneD(Pair<int, int> coords){
+	private int convertTwoD2OneD(Pair<int, int> coords){
 		return coords.First + ((8 - (coords.Second+1)) * 8);
 	}
 }
 
-public class Pair<T, U> { 
-	public Pair() { 
-	} 
+public class Pair<T, U> {
+	public Pair() {
+	}
 
-	public Pair(T first, U second) { 
-		this.First = first; 
-		this.Second = second; 
-	} 
+	public Pair(T first, U second) {
+		this.First = first;
+		this.Second = second;
+	}
 
 
-	public T First { get; set; } 
-	public U Second { get; set; } 
-}; 
+	public T First { get; set; }
+	public U Second { get; set; }
+};
