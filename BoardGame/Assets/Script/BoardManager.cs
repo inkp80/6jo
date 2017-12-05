@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour {
 	//	public static bool controllStatus = true;
-	// private const string SERVER_URL = "http://18.220.106.253:5090/post";
-private const string SERVER_URL = "http://0.0.0.0:5090/post";
+	private const string SERVER_URL = "http://18.217.70.204:5090/post";
+	// private const string SERVER_URL = "http://0.0.0.0:5090/post";
 	private bool AIMODE = true;
 	bool serverAiActionRequestResult = false;
 
@@ -103,6 +103,7 @@ private const string SERVER_URL = "http://0.0.0.0:5090/post";
 	private void activateCurrentTurn(){
 
 		if (AIMODE == true) {
+			//serverAiActionRequestResult rename to  => serverReqeustState
 			if (serverAiActionRequestResult == false && currentPlayer == WHITE_PLAYER) {
 				sendAiRequest ();
 			} else if (currentPlayer == BLACK_PLAYER) {
@@ -181,9 +182,10 @@ private const string SERVER_URL = "http://0.0.0.0:5090/post";
 				availStone.x = availList [0].x;
 				availStone.z = availList [0].z;
 
-				Vector3 spawnPosition = getTileCenter ((int)availStone.x, (int)availStone.z);
+				Vector3 spawnPosition = getTileCenter ((int)availStone.x, (int)(availStone.z));
+				spawnPosition.Set ((float)(spawnPosition.x), (float)spawnPosition.y,(float)(spawnPosition.z - 0.25));
 
-				GameObject go = Instantiate (removalPrefab, spawnPosition, Quaternion.identity) as GameObject;
+				GameObject go = Instantiate (removalPrefab, spawnPosition, Quaternion.AngleAxis(180, Vector3.up)) as GameObject;
 
 				removalList.Add (go);
 
@@ -564,12 +566,11 @@ private const string SERVER_URL = "http://0.0.0.0:5090/post";
 		WWW www = new WWW (SERVER_URL, form);
 		StartCoroutine(WaitForRequest(www));
 	}
-
+		
 	IEnumerator WaitForRequest(WWW www)
 	{
 		serverAiActionRequestResult = true;
 		yield return www;
-
 		if (www.error == null)
 		{
 			Pair<int, int> coords = convertOneD2TwoD(int.Parse(www.text));
@@ -578,6 +579,8 @@ private const string SERVER_URL = "http://0.0.0.0:5090/post";
 			// Fire AI action after 3 sec.
 			yield return new WaitForSeconds(3);
 			startAction (coords.First, 7 - coords.Second, currentPlayer);
+			serverAiActionRequestResult = false;
+			nextFire = Time.time + fireRate;
 		} else {
 			// Something wrong!
 			Debug.Log ("WWW error: " + www.error);
