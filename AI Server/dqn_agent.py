@@ -19,7 +19,7 @@ class DQNAgent :
         self.rows = rows
         self.cols = cols
         self.flag = flag
-        self.good = [0, 7, 56, 63]
+        self.good = [0, 7, 56, 63, 2,3,4,5,16,23,24,31,32,39,40,47,58,59,60,61]
         self.bad = [1, 6, 8, 9, 14, 15, 48, 49, 54, 55, 57, 62]
         
         # DQN 뉴럴네트워크를 위한 값들        
