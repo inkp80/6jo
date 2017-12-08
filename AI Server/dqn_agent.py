@@ -19,8 +19,10 @@ class DQNAgent :
         self.rows = rows
         self.cols = cols
         self.flag = flag
-        self.good = [0, 7, 56, 63, 2,3,4,5,16,23,24,31,32,39,40,47,58,59,60,61]
-        self.bad = [1, 6, 8, 9, 14, 15, 48, 49, 54, 55, 57, 62]
+        self.good1 = [0, 7, 56, 63]
+        self.good2 = [2, 5, 16, 23, 40, 47, 58, 61]
+        self.bad1 = [1, 6, 8, 15, 48, 55, 57, 62]
+        self.bad2 = [9, 14, 49, 54]
         
         # DQN 뉴럴네트워크를 위한 값들        
         self.miniBatchSize = 60
@@ -58,18 +60,26 @@ class DQNAgent :
             b1 = tf.get_variable("b1", shape = [self.size], initializer = tf.contrib.layers.xavier_initializer())
             L1 = tf.nn.relu(tf.matmul(X, W1) + b1)
         
-            # Hidden Layer
+            # Hidden Layer1
             W2 = tf.get_variable("W2", shape = [self.size, self.size], initializer = tf.contrib.layers.xavier_initializer())        
             b2 = tf.get_variable("b2", shape = [self.size], initializer = tf.contrib.layers.xavier_initializer())
             L2 = tf.nn.relu(tf.matmul(L1, W2) + b2)
             
             if self.flag is True :
                 L2 = tf.nn.dropout(L2, 0.8)
-
-            # Output Layer
+                
+            # Hidden Layer2
             W3 = tf.get_variable("W3", shape = [self.size, self.size], initializer = tf.contrib.layers.xavier_initializer())        
             b3 = tf.get_variable("b3", shape = [self.size], initializer = tf.contrib.layers.xavier_initializer())
-            output = tf.matmul (L2, W3) + b3
+            L3 = tf.nn.relu(tf.matmul(L2, W3) + b3)
+            
+            if self.flag is True :
+                L3 = tf.nn.dropout(L3, 0.8)
+
+            # Output Layer
+            W4 = tf.get_variable("W4", shape = [self.size, self.size], initializer = tf.contrib.layers.xavier_initializer())        
+            b4 = tf.get_variable("b4", shape = [self.size], initializer = tf.contrib.layers.xavier_initializer())
+            output = tf.matmul (L3, W4) + b4
             
         return output
 
@@ -88,20 +98,46 @@ class DQNAgent :
             # random
             return np.random.choice(targets)
         else :
-            for i in self.good :
+            #qvalue, action = self.selectEnableAction(state, targets)
+            #return action
+            temp = []
+            for i in self.good1 :
                 if i in targets :
-                    return i
+                    temp.append(i)
+            if temp != [] :
+                qvalue, action = self.selectEnableAction(state, temp)
+                return action
             else :
-                temp = copy.deepcopy(targets)
-                for i in self.bad :
+                for i in self.good2 :
                     if i in targets :
-                        targets.remove(i)
-                if targets != [] :
-                    qvalue, action = self.selectEnableAction(state, targets)
-                    return action
-                else :
+                        temp.append(i)
+                if temp != [] :
                     qvalue, action = self.selectEnableAction(state, temp)
                     return action
+                else :
+                    temp = copy.deepcopy(targets)
+                    
+                    for i in self.bad1 :
+                        if i in targets :
+                            targets.remove(i)
+                    for i in self.bad2 :
+                        if i in targets :
+                            targets.remove(i)
+                    if targets != [] :
+                        qvalue, action = self.selectEnableAction(state, targets)
+                        return action
+                    else :
+                        temp1 = []
+                        temp2 = copy.deepcopy(state)
+                        for i in self.bad1 :
+                            if i in temp :
+                                temp1.append(i)
+                        if temp1 != [] :
+                            qvalue, action = self.selectEnableAction(state, temp1)
+                            return action
+                        else :
+                            qvalue, action = self.selectEnableAction(state, temp)
+                            return action
             
     # qvalue중에서 target안에 있고 가장 큰 값 고름  
     def selectEnableAction(self, state, targets, isTarget = False) :

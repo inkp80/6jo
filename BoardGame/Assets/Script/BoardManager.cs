@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour {
-	//	public static bool controllStatus = true;
+	public Rigidbody gameBoardBody;
+	public bool cameraMovePermission = false;
 	private const string SERVER_URL = "http://18.217.70.204:5090/post";
 	// private const string SERVER_URL = "http://0.0.0.0:5090/post";
 	private bool AIMODE = true;
@@ -63,10 +64,11 @@ public class BoardManager : MonoBehaviour {
 	public Image image2;
 	public Text text1;
 	public Text text2;
-	public Vector2 vector1 = new Vector2(60, 60);
+	public Vector2 vector1 = new Vector2(65, 65);
 	public Vector2 vector2 = new Vector2(40, 40);
 
 	private void Start(){
+		gameBoardBody = GetComponent<Rigidbody> ();
 		activedPieces = new Piece[8, 8];
 		initBoard ();
 		currentPlayer = BLACK_PLAYER;
@@ -90,7 +92,6 @@ public class BoardManager : MonoBehaviour {
 		//추가됨
 		if (needCreate) {
 			DrawAvail ();
-
 			//	DrawAvail
 			//	1. check is there any skiped turn
 			//	2. count and draw avail position marker(red obj)
@@ -117,27 +118,36 @@ public class BoardManager : MonoBehaviour {
 
 
 	private void getUserInput(){
-		if (Input.GetMouseButtonUp (0) && Time.time > nextFire) {
+		if (cameraMovePermission == true) {
+			//Can't select anything while cam move permission is true
+			return;
+		}
+		if (Input.GetMouseButtonDown (0) && Time.time > nextFire) {
+			Debug.Log ("touch detect");
 			nextFire = Time.time + fireRate;
 			startAction (selectionX, selectionY, currentPlayer);
 		}
 	}
 
-	IEnumerator noticeTo(int player){
+	IEnumerator toastMessage(string str){
 		//StartCoroutine(noticePlayersTurn(player);	
 		//do action;
-		resultText.text = "No place to select!\nPass to next player";
+		yield return new WaitForSeconds (1.5f);
+		Debug.Log("toast!");
+		resultText.text = str;
 		resultText.enabled = true;
-		yield return new WaitForSeconds (1.0f);
+		yield return new WaitForSeconds (3.0f);
 		resultText.enabled = false;
 
 	}
 
 	// 추가됨. 승리조건에 따른 메시지 출력
 	private void DecideWinner() {
+		
 		if (whitePieces == 0) {
 			resultText.text = "Black Wins!";
 			needCreate = false;
+
 			UIController.result = true;
 		} else if (blackPieces == 0) {
 			resultText.text = "White Wins!";
@@ -192,17 +202,23 @@ public class BoardManager : MonoBehaviour {
 				availList.RemoveAt (0);
 			}
 
+			setPlayerTurnUI (currentPlayer);
+//			if (currentPlayer == WHITE_PLAYER) {
+//				StartCoroutine (toastMessage("WHITE(AI) TURN"));
+//			} else {
+//				StartCoroutine (toastMessage("BLACK(USER) TURN"));
+//			}
 			needCreate = false;
 
 		} else {
 			if (currentPlayer == 0) {
 				whiteTurnSkip = true;
 				print ("white가 놓을 곳이 없음. black 턴으로 이동");
-				StartCoroutine(noticeTo(currentPlayer));
+				StartCoroutine(toastMessage("No place to select!\nPass to next player : black"));
 			} else {
 				blackTurnSkip = true;
 				print ("black이 놓을 곳이 없음. white 턴으로 이동");
-				StartCoroutine(noticeTo(currentPlayer));
+				StartCoroutine(toastMessage("No place to select!\nPass to next player : white"));
 			}
 			currentPlayer = ~currentPlayer;
 			needCreate = true;
@@ -290,7 +306,8 @@ public class BoardManager : MonoBehaviour {
 
 			selectionX = (int)hit.point.x;
 			selectionY = (int)hit.point.z;
-			//			Debug.Log (hit.point);
+			Debug.Log ("Print Result");
+			Debug.Log (hit.point);
 		} else {
 			selectionX = -1;
 			selectionY = -1;
@@ -638,6 +655,28 @@ public class BoardManager : MonoBehaviour {
 
 	private int convertTwoD2OneD(Pair<int, int> coords){
 		return coords.First + ((8 - (coords.Second+1)) * 8);
+	}
+		
+	public void changeCameraMovePermission(){
+		cameraMovePermission = !cameraMovePermission;
+	}
+
+	public void kkaboom(){
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (activedPieces [i, j] == null) {
+					continue;
+				}
+				activedPieces [i, j].rigidbody.AddForce(Vector3.up * 400);
+				if (i > 3) {
+					activedPieces [i, j].rigidbody.AddForce (Vector3.right * 100);
+				} else {
+					activedPieces [i, j].rigidbody.AddForce (Vector3.left * 100);
+				}
+				activedPieces[i,j].rigidbody.AddTorque (0, 0, 100);
+			}
+		}
+//		gameBoardBody.AddExplosionForce (3, new Vector3 (2, 2, 2), 10);
 	}
 }
 

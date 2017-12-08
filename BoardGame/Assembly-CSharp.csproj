@@ -53,6 +53,7 @@
   <ItemGroup>
      <Compile Include="Assets\Script\BlackScore.cs" />
      <Compile Include="Assets\Script\BoardManager.cs" />
+     <Compile Include="Assets\Script\CameraController.cs" />
      <Compile Include="Assets\Script\MenuButton.cs" />
      <Compile Include="Assets\Script\Piece.cs" />
      <Compile Include="Assets\Script\Play1vs1.cs" />

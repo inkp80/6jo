@@ -7,7 +7,7 @@ public class Piece : MonoBehaviour {
 	private const int WHITE_PLAYER = 0;	
 	private const int BLACK_PLAYER = -1;
 
-	private Rigidbody rigidbody;
+	public Rigidbody rigidbody;
 	private int pieceOwner;
 	private int positionX = -1;
 	private int positionY = -1;
